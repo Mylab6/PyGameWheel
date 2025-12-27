@@ -1,0 +1,46 @@
+name: Build aarch64 wheels (GitHub-hosted ARM64)
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build_hosted_arm64:
+    # Use GitHub-hosted ARM64 runners (public repos) — single job as requested
+    runs-on: [ubuntu-24.04-arm]
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Runner info
+        run: |
+          uname -a
+          echo "Using GitHub-hosted ARM64 runner"
+
+
+      - name: Ensure requirements file
+        run: cp requirements_engine.txt /tmp/requirements_engine.txt
+
+      - name: Install system build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            python3 python3-pip python3-dev build-essential libffi-dev libssl-dev pkg-config \
+            libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libfreetype6-dev libjpeg-dev libpng-dev
+
+      - name: Build wheels natively on runner
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          mkdir -p wheels
+          python3 -m pip wheel -r /tmp/requirements_engine.txt -w wheels || true
+
+      - name: List produced wheels
+        run: ls -la wheels || true
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels
+          path: wheels/

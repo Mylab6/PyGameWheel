@@ -1,4 +1,4 @@
-name: Build aarch64 wheels (GitHub-hosted ARM64)
+name: Build aarch64 wheels (GitHub-hosted ARM64) ok
 
 on:
   workflow_dispatch: {}
